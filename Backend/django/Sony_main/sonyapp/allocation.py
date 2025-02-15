@@ -1,6 +1,6 @@
 import json
 from django.db import transaction, connection
-from .models import RetailerOrder, Employee, Shipment
+from .models import Employee, Shipment, Order
 
 def reset_shipment_sequence():
     """
@@ -8,7 +8,6 @@ def reset_shipment_sequence():
     is one greater than the current maximum in the sonyapp_shipment table.
     """
     with connection.cursor() as cursor:
-        # Note: Adjust table and column names if necessary.
         cursor.execute(
             "SELECT setval(pg_get_serial_sequence('sonyapp_shipment', 'shipment_id'), "
             "COALESCE((SELECT MAX(shipment_id) FROM sonyapp_shipment), 0) + 1, false);"
@@ -19,7 +18,8 @@ def allocate_shipments():
         # Reset shipment sequence to avoid duplicate primary key errors.
         reset_shipment_sequence()
         
-        pending_orders = RetailerOrder.objects.filter(status='pending').select_related('retailer', 'order__product')
+        # Fetch all pending orders with related product and retailer data.
+        pending_orders = Order.objects.filter(status='pending').select_related('retailer', 'product')
         employees = Employee.objects.select_related('truck').order_by('shipment_priority')
 
         # Map each valid truck's primary key (truck_id) to its capacity.
@@ -29,13 +29,12 @@ def allocate_shipments():
 
         for order in pending_orders:
             retailer = order.retailer
-            order_details = order.order
-            product = order_details.product
+            product = order.product
 
             # Check stock availability.
-            if product.available_quantity < order_details.required_qty:
+            if product.available_quantity < order.required_qty:
                 allocations.append({
-                    "order_id": order_details.order_id,
+                    "order_id": order.order_id,
                     "status": "failed",
                     "reason": "Insufficient stock"
                 })
@@ -47,7 +46,7 @@ def allocate_shipments():
             # Find the best employee with enough truck capacity.
             for employee in employees:
                 if (employee.truck and 
-                    truck_capacity.get(employee.truck.truck_id, 0) >= order_details.required_qty):
+                    truck_capacity.get(employee.truck.truck_id, 0) >= order.required_qty):
                     if retailer.distance_from_warehouse < min_distance:
                         assigned_employee = employee
                         min_distance = retailer.distance_from_warehouse
@@ -55,29 +54,27 @@ def allocate_shipments():
             if assigned_employee:
                 with transaction.atomic():
                     # Update product stock.
-                    product.available_quantity -= order_details.required_qty
-                    product.total_shipped += order_details.required_qty
+                    product.available_quantity -= order.required_qty
+                    product.total_shipped += order.required_qty
                     product.save(update_fields=['available_quantity', 'total_shipped'])
 
-                    # Update order statuses.
-                    order_details.status = 'allocated'
-                    order_details.save(update_fields=['status'])
+                    # Update order status.
                     order.status = 'allocated'
                     order.save(update_fields=['status'])
 
                     # Reduce the truck's available capacity.
-                    truck_capacity[assigned_employee.truck.truck_id] -= order_details.required_qty
+                    truck_capacity[assigned_employee.truck.truck_id] -= order.required_qty
 
-                    # Create a Shipment record (Django auto-generates shipment_id).
+                    # Create a Shipment record.
                     shipment = Shipment.objects.create(
-                        order=order_details,
+                        order=order,
                         truck=assigned_employee.truck,
                         employee=assigned_employee,
                         status='in_transit'
                     )
 
                     allocations.append({
-                        "order_id": order_details.order_id,
+                        "order_id": order.order_id,
                         "retailer": retailer.name,
                         "product": product.name,
                         "allocated_employee": assigned_employee.name,

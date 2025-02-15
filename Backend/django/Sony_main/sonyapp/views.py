@@ -1,12 +1,20 @@
+import json
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import Employee, Retailer, Order, RetailerOrder, Truck, Shipment
-from .serializers import EmployeeSerializer, RetailerSerializer, OrderSerializer, RetailerOrderSerializer, TruckSerializer, ShipmentSerializer
-from .allocation import allocate_shipments
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+from .models import Employee, Retailer, Order, Truck, Shipment
+from .serializers import EmployeeSerializer, RetailerSerializer, OrderSerializer, TruckSerializer, ShipmentSerializer
+from .allocation import allocate_shipments
+
+# ✅ Custom Pagination Class
+class StandardPagination(PageNumberPagination):
+    page_size = 10  # Customize per need
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 # ✅ Custom JWT Login View
 class CustomAuthToken(TokenObtainPairView):
@@ -39,49 +47,82 @@ def logout_view(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-# ✅ Get Employees (Protected)
+# ✅ Get Employees (Protected, Paginated)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_employees(request):
-    employees = Employee.objects.all()
-    serializer = EmployeeSerializer(employees, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        employees = Employee.objects.all()
+        paginator = StandardPagination()
+        paginated_employees = paginator.paginate_queryset(employees, request)
+        serializer = EmployeeSerializer(paginated_employees, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# ✅ Get Retailers (Protected)
+# ✅ Get Retailers (Protected, Paginated)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_retailers(request):
-    retailers = Retailer.objects.all()
-    serializer = RetailerSerializer(retailers, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        retailers = Retailer.objects.all()
+        paginator = StandardPagination()
+        paginated_retailers = paginator.paginate_queryset(retailers, request)
+        serializer = RetailerSerializer(paginated_retailers, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# ✅ Get Orders (Protected)
+# ✅ Get Orders (Protected, Paginated, Filterable)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_orders(request):
-    orders = Order.objects.all()
-    serializer = OrderSerializer(orders, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        status_filter = request.GET.get('status')  # Optional filter
+        orders = Order.objects.all().order_by('-created_at')
+
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+
+        paginator = StandardPagination()
+        paginated_orders = paginator.paginate_queryset(orders, request)
+        serializer = OrderSerializer(paginated_orders, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ✅ Allocate Orders (Protected)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def allocate_orders(request):
-    allocation_result = allocate_shipments()
-    return Response(allocation_result, content_type="application/json", status=status.HTTP_200_OK)
+    try:
+        allocation_result = json.loads(allocate_shipments())  # Convert JSON string to dict
+        return Response(allocation_result, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# ✅ Get Trucks (Protected)
+# ✅ Get Trucks (Protected, Paginated)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_trucks(request):
-    trucks = Truck.objects.all()
-    serializer = TruckSerializer(trucks, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        trucks = Truck.objects.all()
+        paginator = StandardPagination()
+        paginated_trucks = paginator.paginate_queryset(trucks, request)
+        serializer = TruckSerializer(paginated_trucks, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# ✅ Get Shipments (Protected)
+# ✅ Get Shipments (Protected, Paginated)
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_shipments(request):
-    shipments = Shipment.objects.all()
-    serializer = ShipmentSerializer(shipments, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    try:
+        shipments = Shipment.objects.all().order_by('-created_at')
+        paginator = StandardPagination()
+        paginated_shipments = paginator.paginate_queryset(shipments, request)
+        serializer = ShipmentSerializer(paginated_shipments, many=True)
+        return paginator.get_paginated_response(serializer.data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

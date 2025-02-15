@@ -1,4 +1,8 @@
-from django.db import models
+from django.db import models, transaction
+from django.db.models import F
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 
 class Category(models.Model):
     category_id = models.AutoField(primary_key=True)
@@ -6,6 +10,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
@@ -24,6 +29,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+
 class Retailer(models.Model):
     retailer_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -34,8 +40,10 @@ class Retailer(models.Model):
     def __str__(self):
         return self.name
 
+
 class Order(models.Model):
     order_id = models.AutoField(primary_key=True)
+    retailer = models.ForeignKey(Retailer, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     required_qty = models.PositiveIntegerField()
     order_date = models.DateTimeField(auto_now_add=True)
@@ -43,30 +51,15 @@ class Order(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('allocated', 'Allocated'),
+        ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled')
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
-        return f"Order {self.order_id} - {self.product.name}"
+        return f"Order {self.order_id} - {self.product.name} - {self.retailer.name}"
 
-class RetailerOrder(models.Model):
-    retailer = models.ForeignKey(Retailer, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    order_date = models.DateTimeField(auto_now_add=True)
 
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('allocated', 'Allocated'),
-        ('cancelled', 'Cancelled')
-    ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-
-    class Meta:
-        unique_together = ('retailer', 'order')
-
-    def __str__(self):
-        return f"Retailer {self.retailer.name} - Order {self.order.order_id}"
 
 class Truck(models.Model):
     truck_id = models.AutoField(primary_key=True)
@@ -75,6 +68,7 @@ class Truck(models.Model):
 
     def __str__(self):
         return self.license_plate
+
 
 class Employee(models.Model):
     employee_id = models.AutoField(primary_key=True)
@@ -85,6 +79,7 @@ class Employee(models.Model):
 
     def __str__(self):
         return f"{self.name} (Truck: {self.truck.license_plate})"
+
 
 class Shipment(models.Model):
     shipment_id = models.AutoField(primary_key=True)
@@ -102,7 +97,3 @@ class Shipment(models.Model):
 
     def __str__(self):
         return f"Shipment {self.shipment_id} - {self.truck.license_plate}"
-    
-
-
-
