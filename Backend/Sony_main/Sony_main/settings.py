@@ -84,8 +84,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'sonymain',
-        'USER': 'sony',
-        'PASSWORD': 'steamers',
+        'USER': 'postgres',
+        'PASSWORD': '88888888',
         'HOST': 'localhost',  # If running PostgreSQL locally
         'PORT': '5432',       # Default PostgreSQL port
     }

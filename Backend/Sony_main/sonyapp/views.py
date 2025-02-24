@@ -15,6 +15,7 @@ from .serializers import (
 )
 from .allocation import allocate_shipments
 from .permissions import IsAdminUser
+from django.db.models import F
 
 # ✅ Custom Pagination Class
 class StandardPagination(PageNumberPagination):
@@ -178,3 +179,48 @@ def category_stock_data(request):
         return Response({"success": True, "data": serialized_data})
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])  # Restrict access to admin only
+def store_qr_code(request):
+    """API to process and store QR code data into the Product model (Admin Only)"""
+    try:
+        if not request.user.is_staff:  # Double-check admin access
+            return Response({"error": "Permission denied. Admins only."}, status=403)
+
+        qr_data = request.data.get("qr_text", "")  # Get the QR code text
+
+        # Example QR Code Data Format: "name=Camera|category=Electronics|quantity=10"
+        data_dict = dict(item.split("=") for item in qr_data.split("|"))
+
+        product_name = data_dict.get("name")
+        category_name = data_dict.get("category")
+        quantity = int(data_dict.get("quantity", 0))
+
+        if not product_name or not category_name or quantity <= 0:
+            return Response({"error": "Invalid QR Code data"}, status=400)
+
+        # Fetch or create the category
+        category, _ = Category.objects.get_or_create(name=category_name)
+
+        # Fetch existing product or create a new one
+        product, created = Product.objects.get_or_create(
+            name=product_name, category=category,
+            defaults={"available_quantity": 0}  # Ensure no NULL values
+        )
+
+        if created:
+            product.available_quantity = quantity  # Set quantity for new product
+        else:
+            # Update quantity safely using F() expression
+            Product.objects.filter(product_id=product.product_id).update(
+                available_quantity=F('available_quantity') + quantity
+            )
+            product.refresh_from_db()  # Fetch updated values from DB
+
+        product.save()  # Save to trigger signals
+
+        return Response({"message": "Product updated successfully"}, status=201)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)

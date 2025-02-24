@@ -3,7 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.urlpatterns import format_suffix_patterns  # ✅ For better API format handling
 from .views import (
     CustomAuthToken, logout_view, get_employees, get_retailers,
-    get_orders, allocate_orders, get_trucks, get_shipments,get_stock_data,category_stock_data
+    get_orders, allocate_orders, get_trucks, get_shipments,get_stock_data,category_stock_data,store_qr_code
 )
 
 urlpatterns = [
@@ -21,7 +21,8 @@ urlpatterns = [
     path("shipments/", get_shipments, name="get_shipments"),  # Admin & Employees.
     path('stock/', get_stock_data, name='stock-data'),
     path('category-stock/', category_stock_data, name='category-stock-data'),
+    path('store_qr/', store_qr_code, name='store_qr'),
 ]
 
-# ✅ Support API requests with format suffixes (e.g., `/orders.json`, `/orders.xml`)
+# ✅ Support API requests with format suffixes (e.g., /orders.json, /orders.xml)
 urlpatterns = format_suffix_patterns(urlpatterns, allowed=["json", "html"])
