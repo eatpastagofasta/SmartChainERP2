@@ -69,7 +69,8 @@ export function LoginForm({
         <CardHeader className="pb-2">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription className="text-gray-400 border-b border-gray-600 pb-2">
-            Enter your username below to log in to your account
+
+            Enter your username below to login to your account
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-4">

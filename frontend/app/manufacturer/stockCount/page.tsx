@@ -14,15 +14,12 @@ export default function StockCountPage() {
 
   return (
     <div className="relative p-6 bg-black text-blue-300 min-h-screen">
-      <h1 className="text-xl font-semibold mb-6 text-blue-400">Stock Dashboard</h1>
-      
-      <NavigationBar activeView={activeView} setActiveView={setActiveView} />
-      
+      <h1 className="text-xl font-semibold mb-6 text-blue-400">Stock Dashboard</h1>      
+      <NavigationBar activeView={activeView} setActiveView={setActiveView} />     
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <StockOverview activeView={activeView} stockData={stockData} />
         </div>
-        
         <div className="space-y-6">
           <SidePanel stockData={stockData} />
         </div>
@@ -30,3 +27,4 @@ export default function StockCountPage() {
     </div>
   );
 }
+

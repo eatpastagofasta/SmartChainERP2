@@ -19,7 +19,7 @@ interface StockChartsProps {
 }
 
 const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
-  const { categoryData } = useCategoryData();
+  const { categoryData } = useCategoryData(); // ✅ Keep this, it's needed.
 
   const compareData = stockData.map(item => ({
     name: item.productName,
@@ -36,7 +36,7 @@ const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
           <PieChart>
             <Pie
               data={categoryData}
-              dataKey="product_count"
+              dataKey="product_count" // ✅ Use the correct key from your dataset
               nameKey="name"
               cx="50%"
               cy="50%"
@@ -45,7 +45,7 @@ const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             >
               {categoryData.map((entry, index) => (
-                <Cell key={entry.name} fill={entry.fill} />
+                <Cell key={entry.name} fill={entry.fill} /> // ✅ Keep a meaningful key
               ))}
             </Pie>
             <Tooltip />
