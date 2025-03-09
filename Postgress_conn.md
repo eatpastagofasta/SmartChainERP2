@@ -134,7 +134,14 @@ Request → Django API → Django → Database → Django converts the data into
   ```sh
   python manage.py runserver
   ```
+- Make migration for other folders:
+```sh
+python manage.py makemigrations sonyapp
+```
 
+```sh
+python manage.py migrate sonyapp
+```
 ---
 
 ### 4) Django REST API
