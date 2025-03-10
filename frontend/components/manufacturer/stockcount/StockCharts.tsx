@@ -1,12 +1,26 @@
 import React from 'react';
-import { BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Cell, Legend, ResponsiveContainer } from 'recharts';
-import { StockItem, categoryData } from './data';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
+import { StockItem, useCategoryData } from './data';
 
 interface StockChartsProps {
   stockData: StockItem[];
 }
 
 const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
+  const { categoryData } = useCategoryData(); // ✅ Keep this, it's needed.
+
   const compareData = stockData.map(item => ({
     name: item.productName,
     available: item.available,
@@ -22,7 +36,7 @@ const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
           <PieChart>
             <Pie
               data={categoryData}
-              dataKey="value"
+              dataKey="product_count" // ✅ Use the correct key from your dataset
               nameKey="name"
               cx="50%"
               cy="50%"
@@ -31,7 +45,7 @@ const StockCharts: React.FC<StockChartsProps> = ({ stockData }) => {
               label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
             >
               {categoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
+                <Cell key={entry.name} fill={entry.fill} /> // ✅ Keep a meaningful key
               ))}
             </Pie>
             <Tooltip />
