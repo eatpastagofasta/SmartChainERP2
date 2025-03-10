@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sonyapp', '0011_alter_shipment_employee_alter_shipment_order'),
+        ('app', '0011_alter_shipment_employee_alter_shipment_order'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

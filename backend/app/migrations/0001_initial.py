@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 ('total_shipped', models.PositiveIntegerField(default=0)),
                 ('total_required_quantity', models.PositiveIntegerField(default=0)),
                 ('status', models.CharField(choices=[('on_demand', 'On Demand'), ('sufficient', 'Sufficient')], default='sufficient', max_length=20)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.category')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.category')),
             ],
         ),
         migrations.CreateModel(
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                 ('required_qty', models.PositiveIntegerField()),
                 ('order_date', models.DateTimeField(auto_now_add=True)),
                 ('status', models.CharField(choices=[('pending', 'Pending'), ('allocated', 'Allocated'), ('cancelled', 'Cancelled')], default='pending', max_length=20)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.product')),
+                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.product')),
             ],
         ),
         migrations.CreateModel(
@@ -74,15 +74,15 @@ class Migration(migrations.Migration):
                 ('shipment_id', models.AutoField(primary_key=True, serialize=False)),
                 ('shipment_date', models.DateTimeField(auto_now_add=True)),
                 ('status', models.CharField(choices=[('in_transit', 'In Transit'), ('delivered', 'Delivered'), ('failed', 'Failed')], default='in_transit', max_length=20)),
-                ('employee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.employee')),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.order')),
-                ('truck', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.truck')),
+                ('employee', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.employee')),
+                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.order')),
+                ('truck', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.truck')),
             ],
         ),
         migrations.AddField(
             model_name='employee',
             name='truck',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.truck'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='app.truck'),
         ),
         migrations.CreateModel(
             name='RetailerOrder',
@@ -90,8 +90,8 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('order_date', models.DateTimeField(auto_now_add=True)),
                 ('status', models.CharField(choices=[('pending', 'Pending'), ('allocated', 'Allocated'), ('cancelled', 'Cancelled')], default='pending', max_length=20)),
-                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.order')),
-                ('retailer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sonyapp.retailer')),
+                ('order', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.order')),
+                ('retailer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.retailer')),
             ],
             options={
                 'unique_together': {('retailer', 'order')},

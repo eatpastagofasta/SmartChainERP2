@@ -7,18 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sonyapp', '0010_remove_employee_shipment_priority'),
+        ('app', '0010_remove_employee_shipment_priority'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='shipment',
             name='employee',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shipments', to='sonyapp.employee'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shipments', to='app.employee'),
         ),
         migrations.AlterField(
             model_name='shipment',
             name='order',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='shipment', to='sonyapp.order'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='shipment', to='app.order'),
         ),
     ]

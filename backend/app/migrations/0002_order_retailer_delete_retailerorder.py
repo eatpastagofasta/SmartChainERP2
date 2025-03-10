@@ -7,14 +7,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sonyapp', '0001_initial'),
+        ('app', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='order',
             name='retailer',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='sonyapp.retailer'),
+            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='app.retailer'),
             preserve_default=False,
         ),
         migrations.DeleteModel(

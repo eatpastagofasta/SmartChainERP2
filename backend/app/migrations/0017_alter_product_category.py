@@ -7,13 +7,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sonyapp', '0016_alter_employee_user'),
+        ('app', '0016_alter_employee_user'),
     ]
 
     operations = [
         migrations.AlterField(
             model_name='product',
             name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='sonyapp.category'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='products', to='app.category'),
         ),
     ]

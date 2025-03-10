@@ -17,6 +17,11 @@ from .allocation import allocate_shipments
 from .permissions import IsAdminUser
 from django.db.models import F
 
+from django.shortcuts import redirect
+
+def redirect_view(request):
+    return redirect('/admin/')
+
 # ✅ Custom Pagination Class
 class StandardPagination(PageNumberPagination):
     page_size = 10

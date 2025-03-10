@@ -1,5 +1,5 @@
 """
-URL configuration for Sony_main project.
+URL configuration for main project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.1/topics/http/urls/
@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from app.views import redirect_view
 
 urlpatterns = [
+    path('', redirect_view),
     path('admin/', admin.site.urls),
-    path('api/', include('sonyapp.urls')),  # Include sonyapp URLs
+    path('api/', include('app.urls')),  # Include app URLs
 ]
 
 

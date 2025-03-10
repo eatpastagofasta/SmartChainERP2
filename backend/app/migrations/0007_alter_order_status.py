@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sonyapp', '0006_alter_order_order_id'),
+        ('app', '0006_alter_order_order_id'),
     ]
 
     operations = [
