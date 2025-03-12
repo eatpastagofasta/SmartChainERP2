@@ -28,7 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["postgresql://joshua:WJy0t4sGlWpqu8lcNLybeDgVBg6sTlZV@dpg-cv8gce8gph6c73ab2kkg-a.singapore-postgres.render.com/sony_pn59",
     "localhost",
-    "127.0.0.1"]
+    "127.0.0.1",
+    "smartchainerp2.onrender.com"]
 
 
 # Application definition
