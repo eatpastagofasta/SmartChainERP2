@@ -8,7 +8,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowUpDown, CheckCircle, XCircle } from "lucide-react";
+import { ArrowUpDown} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {

@@ -51,7 +51,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
 };
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  let accessToken = getAccessToken();
+  const accessToken = getAccessToken();
 
   let response = await fetch(url, {
     ...options,

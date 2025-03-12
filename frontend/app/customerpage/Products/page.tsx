@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { ShoppingCart, User } from 'lucide-react';
 import { MOCK_PRODUCTS } from '../../../components/customerpage/data/mockData';
 
 const ProductsTab = () => {
 
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All');
+  const [category] = useState('All');
 
   const filteredProducts = MOCK_PRODUCTS.filter(product => {
     const matchesSearch = search === '' || 
@@ -51,10 +52,12 @@ const ProductsTab = () => {
         <main className="p-8 max-w-[1600px] mx-auto">
           <div className="grid grid-cols-4 gap-8">
             {filteredProducts.map(product => (
-              <div key={product.id} className="bg-gray-900 rounded-lg p-4">
-                <img
+              <div key={product.id} className="product-card">
+                <Image
                   src={product.image}
                   alt={product.name}
+                  width={500}
+                  height={500}
                   className="w-full aspect-square object-cover rounded-lg mb-4"
                 />
                 <h3 className="text-lg font-semibold">{product.name}</h3>

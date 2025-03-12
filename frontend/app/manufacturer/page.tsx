@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
@@ -16,13 +16,10 @@ import {
 import {
   BarChartIcon,
   ClockIcon,
-  DollarSignIcon,
-  ShoppingBagIcon,
   StoreIcon,
   TableIcon,
   TrendingUpIcon,
   TruckIcon,
-  UsersIcon,
 } from "lucide-react";
 
 //Interface for all the tabs

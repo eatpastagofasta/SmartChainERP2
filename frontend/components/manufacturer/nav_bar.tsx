@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import Anchor from "@/components/customerpage/anchor";
 
 export const NAVLINKS = [

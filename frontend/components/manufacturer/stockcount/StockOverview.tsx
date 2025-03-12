@@ -13,13 +13,13 @@ interface StockOverviewProps {
   };
 }
 
-interface SidePanelProps {
-  stockData: {
-    stockData: StockItem[];
-    loading: boolean;
-    error: string | null;
-  };
-}
+// interface SidePanelProps {
+//   stockData: {
+//     stockData: StockItem[];
+//     loading: boolean;
+//     error: string | null;
+//   };
+// }
 
 const StockOverview: React.FC<StockOverviewProps> = ({ activeView, stockData }) => {
   return (
