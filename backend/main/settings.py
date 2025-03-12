@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["postgresql://joshua:WJy0t4sGlWpqu8lcNLybeDgVBg6sTlZV@dpg-cv8gce8gph6c73ab2kkg-a.singapore-postgres.render.com/sony_pn59",
     "localhost",
     "127.0.0.1",
-    "https://smartchainerp2.onrender.com"]
+    "smartchainerp2.onrender.com"]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Application definition
