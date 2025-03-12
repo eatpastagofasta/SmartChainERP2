@@ -204,19 +204,28 @@ def store_qr_code(request):
     """API to process and store QR code data into the Product model"""
     try:
         qr_data = request.data.get("qr_text", "")  # Get the QR code text
+        logger.info(f"Received QR data: {qr_data}")
 
         # Example QR Code Data Format: "name=Camera|category=Electronics|quantity=10"
-        data_dict = dict(item.split("=") for item in qr_data.split("|"))
+        try:
+            data_dict = dict(item.split("=") for item in qr_data.split("|"))
+        except ValueError as e:
+            logger.error(f"Error parsing QR code data: {e}")
+            return Response({"error": "Invalid QR Code data format"}, status=400)
+
+        logger.info(f"Parsed QR data: {data_dict}")
 
         product_name = data_dict.get("name")
         category_name = data_dict.get("category")
         quantity = int(data_dict.get("quantity", 0))
 
         if not product_name or not category_name or quantity <= 0:
+            logger.error(f"Invalid QR Code data: product_name={product_name}, category_name={category_name}, quantity={quantity}")
             return Response({"error": "Invalid QR Code data"}, status=400)
 
         # Fetch or create the category
         category, _ = Category.objects.get_or_create(name=category_name)
+        logger.info(f"Category: {category.name}")
 
         # Fetch or create the product
         product, created = Product.objects.get_or_create(
@@ -224,10 +233,12 @@ def store_qr_code(request):
             category=category,
             defaults={'available_quantity': 0}  # Ensure available_quantity is initialized
         )
+        logger.info(f"Product: {product.name}, Created: {created}")
 
         # Update the product quantity
         product.available_quantity += quantity
         product.save()
+        logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
 
         return Response({"success": "QR Code data stored successfully"}, status=200)
 

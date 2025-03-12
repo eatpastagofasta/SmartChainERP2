@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
         MQTT_BROKER = "mqtt.eclipseprojects.io"
         MQTT_TOPIC = "warehouse/qr"
-        BACKEND_URL = "http://127.0.0.1:8000/api/store_qr/"  # Update if needed
+        BACKEND_URL = "https://smartchainerp2.onrender.com/api/store_qr/"  # Updated URL
 
         def on_connect(client, userdata, flags, rc):
             self.stdout.write(f"Connected to MQTT with result code {rc}")
@@ -19,8 +19,6 @@ class Command(BaseCommand):
         def on_message(client, userdata, msg):
             data = msg.payload.decode()
             self.stdout.write(f"Received QR data: {data}")
-
-           
 
             # Send HTTP POST request to backend
             try:
