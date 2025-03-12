@@ -29,7 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["postgresql://joshua:WJy0t4sGlWpqu8lcNLybeDgVBg6sTlZV@dpg-cv8gce8gph6c73ab2kkg-a.singapore-postgres.render.com/sony_pn59",
     "localhost",
     "127.0.0.1",
-    "smartchainerp2.onrender.com"]
+    "https://smartchainerp2.onrender.com"]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Application definition
@@ -143,4 +143,8 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Change this to match your frontend URL
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://smartchainerp2.onrender.com",
 ]
