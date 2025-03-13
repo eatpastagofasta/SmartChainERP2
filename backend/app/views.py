@@ -203,22 +203,37 @@ logger = logging.getLogger(__name__)
 def store_qr_code(request):
     """API to process and store QR code data into the Product model"""
     try:
-        qr_data = request.data.get("qr_text", "")  # Get the QR code text
+        qr_data = request.data.get("qr_text", "").strip()  # Get and clean QR text
         logger.info(f"Received QR data: {qr_data}")
 
-        # Example QR Code Data Format: "name=Camera|category=Electronics|quantity=10"
+        if not qr_data:
+            return Response({"error": "QR Code data is empty"}, status=400)
+
+        # Safe parsing
         try:
-            data_dict = dict(item.split("=") for item in qr_data.split("|"))
+            data_dict = {}
+            for item in qr_data.split("|"):
+                if "=" in item:
+                    key, value = item.split("=", 1)  # Ensure only one split
+                    data_dict[key] = value
         except ValueError as e:
             logger.error(f"Error parsing QR code data: {e}")
             return Response({"error": "Invalid QR Code data format"}, status=400)
 
         logger.info(f"Parsed QR data: {data_dict}")
 
-        product_name = data_dict.get("name")
-        category_name = data_dict.get("category")
-        quantity = int(data_dict.get("quantity", 0))
+        product_name = data_dict.get("name", "").strip()
+        category_name = data_dict.get("category", "").strip()
+        quantity_str = data_dict.get("quantity", "0").strip()
 
+        # Validate quantity
+        if not quantity_str.isdigit():
+            logger.error("Quantity must be a positive integer.")
+            return Response({"error": "Quantity must be a positive integer"}, status=400)
+
+        quantity = int(quantity_str)
+
+        # Validate data
         if not product_name or not category_name or quantity <= 0:
             logger.error(f"Invalid QR Code data: product_name={product_name}, category_name={category_name}, quantity={quantity}")
             return Response({"error": "Invalid QR Code data"}, status=400)
@@ -233,9 +248,10 @@ def store_qr_code(request):
             category=category,
             defaults={'available_quantity': 0}  # Ensure available_quantity is initialized
         )
+
         logger.info(f"Product: {product.name}, Created: {created}")
 
-        # Update the product quantity
+        # Update available quantity
         product.available_quantity += quantity
         product.save()
         logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
