@@ -21,7 +21,7 @@ class Product(models.Model):
     product_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="products")
-    available_quantity = models.PositiveIntegerField(default=0)
+    available_quantity = models.PositiveIntegerField()
     total_shipped = models.PositiveIntegerField(default=0)
     total_required_quantity = models.PositiveIntegerField(default=0)
 
@@ -44,6 +44,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
 
 
 class Retailer(models.Model):
@@ -135,11 +136,10 @@ class Shipment(models.Model):
         truck_license_plate = getattr(self.employee.truck, 'license_plate', 'No Truck Assigned')
         return f"Shipment {self.shipment_id} - {truck_license_plate}"
 
-
 class QRScan(models.Model):
     data = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     processed = models.BooleanField(default=False)
-
+    
     def __str__(self):
         return f"{self.data[:30]}... - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
