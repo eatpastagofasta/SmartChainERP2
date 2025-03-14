@@ -135,3 +135,11 @@ class Shipment(models.Model):
     def __str__(self):
         truck_license_plate = getattr(self.employee.truck, 'license_plate', 'No Truck Assigned')
         return f"Shipment {self.shipment_id} - {truck_license_plate}"
+
+class QRScan(models.Model):
+    data = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    processed = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.data[:30]}... - {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
