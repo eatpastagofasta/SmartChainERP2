@@ -1,5 +1,6 @@
 import json
 from django.db import transaction
+from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -8,16 +9,19 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Count
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Employee, Retailer, Order, Truck, Shipment, Product, Category, QRScan
+from .models import Employee, Retailer, Order, Truck, Shipment, Product, Category
 from .serializers import (
     EmployeeSerializer, RetailerSerializer, 
     OrderSerializer, ProductSerializer, TruckSerializer, ShipmentSerializer, CategorySerializer
 )
 from .allocation import allocate_shipments
 from .permissions import IsAdminUser
+from django.db.models import F
+
+from django.shortcuts import redirect
+
+def redirect_view(request):
+    return redirect('/admin/')
 
 # ✅ Custom Pagination Class
 class StandardPagination(PageNumberPagination):
@@ -159,6 +163,10 @@ def get_stock_data(request):
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
 
+# ✅ MQTT Client View
+def mqtt_client_view(request):
+    return render(request, 'mqtt_client.html')
+
 # ✅ Get Category Stock Data (Accessible by Anyone)
 @api_view(["GET"])
 def category_stock_data(request):
@@ -182,77 +190,74 @@ def category_stock_data(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
-# ✅ MQTT Client View
-def mqtt_client_view(request):
-    return render(request, 'mqtt_client.html')
+import logging
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from .models import Category, Product
 
-# ✅ Save QR Data
-@csrf_exempt
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
 def store_qr_code(request):
-    if request.method == 'POST':
+    """API to process and store QR code data into the Product model"""
+    try:
+        qr_data = request.data.get("qr_text", "").strip()  # Get and clean QR text
+        logger.info(f"Received QR data: {qr_data}")
+
+        if not qr_data:
+            return Response({"error": "QR Code data is empty"}, status=400)
+
+        # Safe parsing
         try:
-            # ✅ Debugging: Print the exact raw request body
-            raw_body = request.body.decode('utf-8')
-            print(f"[🧐] Raw Request Body: {raw_body}")
+            data_dict = {}
+            for item in qr_data.split("|"):
+                if "=" in item:
+                    key, value = item.split("=", 1)  # Ensure only one split
+                    data_dict[key] = value
+        except ValueError as e:
+            logger.error(f"Error parsing QR code data: {e}")
+            return Response({"error": "Invalid QR Code data format"}, status=400)
 
-            # ✅ Parse JSON
-            data = json.loads(raw_body)
-            qr_text = data.get("qr_text", "").strip()  # Get the value of qr_text
-            
-            # ✅ Debugging: Ensure extracted text is correct
-            print(f"[✅] Extracted QR Text: {qr_text}")
+        logger.info(f"Parsed QR data: {data_dict}")
 
-            if not qr_text:
-                return JsonResponse({'success': False, 'error': 'QR text is empty'}, status=400)
+        product_name = data_dict.get("name", "").strip()
+        category_name = data_dict.get("category", "").strip()
+        quantity_str = data_dict.get("quantity", "0").strip()
 
-            # ✅ Store raw QR text in QRScan model
-            scan = QRScan.objects.create(data=qr_text, processed=False)
+        # Validate quantity
+        if not quantity_str.isdigit():
+            logger.error("Quantity must be a positive integer.")
+            return Response({"error": "Quantity must be a positive integer"}, status=400)
 
-            # ✅ Extract product details from QR text
-            product_data = {}
-            for pair in qr_text.split('|'):
-                key_value = pair.split('=', 1)
-                if len(key_value) == 2:
-                    product_data[key_value[0].strip()] = key_value[1].strip()
+        quantity = int(quantity_str)
 
-            # ✅ Extract values
-            name = product_data.get("name")
-            category_name = product_data.get("category")
-            quantity_str = product_data.get("quantity")
+        # Validate data
+        if not product_name or not category_name or quantity <= 0:
+            logger.error(f"Invalid QR Code data: product_name={product_name}, category_name={category_name}, quantity={quantity}")
+            return Response({"error": "Invalid QR Code data"}, status=400)
 
-            if not name or not category_name or not quantity_str:
-                return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
+        # Fetch or create the category
+        category, _ = Category.objects.get_or_create(name=category_name)
+        logger.info(f"Category: {category.name}")
 
-            # ✅ Convert quantity to integer
-            try:
-                quantity = int(quantity_str)
-            except ValueError:
-                return JsonResponse({'success': False, 'error': 'Invalid quantity format'}, status=400)
+        # Fetch or create the product
+        product, created = Product.objects.get_or_create(
+            name=product_name,
+            category=category,
+            defaults={'available_quantity': 0}  # Ensure available_quantity is initialized
+        )
 
-            # ✅ Update Product and Category tables
-            category, _ = Category.objects.get_or_create(name=category_name)
-            product, _ = Product.objects.get_or_create(
-                name=name, category=category, defaults={'available_quantity': 0}
-            )
+        logger.info(f"Product: {product.name}, Created: {created}")
 
-            product.available_quantity += quantity
-            product.save()
+        # Update available quantity
+        product.available_quantity += quantity
+        product.save()
+        logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
 
-            scan.processed = True
-            scan.save()
+        return Response({"success": "QR Code data stored successfully"}, status=200)
 
-            return JsonResponse({
-                'success': True,
-                'message': 'QR data processed successfully',
-                'product_id': product.product_id,
-                'available_quantity': product.available_quantity
-            })
-
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
-
-        except Exception as e:
-            print(f"[❌] Error processing QR code: {e}")
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-    return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+    except Exception as e:
+        logger.error(f"Error processing QR code data: {str(e)}")
+        return Response({"error": str(e)}, status=500)
