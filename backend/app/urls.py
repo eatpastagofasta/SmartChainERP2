@@ -1,14 +1,14 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenObtainPairView
 from rest_framework.urlpatterns import format_suffix_patterns  # ✅ For better API format handling
 from .views import (
-    CustomAuthToken, logout_view, get_employees, get_retailers,
+    logout_view, get_employees, get_retailers,
     get_orders, allocate_orders, get_trucks, get_shipments,get_stock_data,category_stock_data,store_qr_code
 )
 
 urlpatterns = [
     # ✅ Authentication Endpoints
-    path("token/", CustomAuthToken.as_view(), name="api_token_auth"),  # Login (Returns JWT tokens)
+    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),  # Login (Returns JWT tokens)
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),  # Refresh JWT token
     path("logout/", logout_view, name="api_logout"),  # Logout (Blacklist refresh token)
 
