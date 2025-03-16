@@ -142,8 +142,10 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Change this to match your frontend URL
+    "http://localhost:3001",  # Change this to match your frontend URL
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "https://smartchainerp2.onrender.com",
