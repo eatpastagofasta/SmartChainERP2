@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "main": "main/main.js",
+  "type": "module",
+
   "scripts": {
     "dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "next build && next export",
