@@ -1,15 +1,15 @@
 import json
 from django.db import transaction
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Count
-from .models import Employee, Retailer, Order, Truck, Shipment, Product, Category, QRScan
+from .models import Employee, Retailer, Order, Truck, Shipment, Product, Category
 from .serializers import (
     EmployeeSerializer, RetailerSerializer, 
     OrderSerializer, ProductSerializer, TruckSerializer, ShipmentSerializer, CategorySerializer
@@ -17,9 +17,8 @@ from .serializers import (
 from .allocation import allocate_shipments
 from .permissions import IsAdminUser
 from django.db.models import F
-import logging
 
-logger = logging.getLogger(__name__)
+from django.shortcuts import redirect
 
 def redirect_view(request):
     return redirect('/admin/')
@@ -191,25 +190,37 @@ def category_stock_data(request):
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
+import logging
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from .models import Category, Product
+
+logger = logging.getLogger(_name_)
+
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def store_qr_code(request):
+    """API to process and store QR code data into the Product model"""
     try:
-        qr_data = request.data.get("qr_text", "")  # Get the QR code text
+        qr_data = request.data.get("qr_text", "").strip()  # Get and clean QR text
         logger.info(f"Received QR data: {qr_data}")
 
         if not qr_data:
             return Response({"error": "QR Code data is empty"}, status=400)
 
-        qr_scan = QRScan.objects.create(data=qr_data)
+        # Safe parsing
+        try:
+            data_dict = {}
+            for item in qr_data.split("|"):
+                if "=" in item:
+                    key, value = item.split("=", 1)  # Ensure only one split
+                    data_dict[key] = value
+        except ValueError as e:
+            logger.error(f"Error parsing QR code data: {e}")
+            return Response({"error": "Invalid QR Code data format"}, status=400)
 
-        # Example logic to handle QR code data
-        # Assuming QR code data contains product information
-        data_dict = {}
-        for item in qr_data.split("|"):
-            if "=" in item:
-                key, value = item.split("=", 1)  # Ensure only one split
-                data_dict[key] = value
+        logger.info(f"Parsed QR data: {data_dict}")
 
         product_name = data_dict.get("name", "").strip()
         category_name = data_dict.get("category", "").strip()
@@ -244,11 +255,6 @@ def store_qr_code(request):
         product.available_quantity += quantity
         product.save()
         logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
-
-        # Process QR scan (example logic)
-        logger.info(f"Processing QR scan: {qr_scan.data}")
-        qr_scan.processed = True
-        qr_scan.save()
 
         return Response({"success": "QR Code data stored successfully"}, status=200)
 
