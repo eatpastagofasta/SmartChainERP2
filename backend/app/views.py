@@ -1,6 +1,6 @@
 import json
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,7 +17,6 @@ from .serializers import (
 from .allocation import allocate_shipments
 from .permissions import IsAdminUser
 from django.db.models import F
-from .utils import process_qr_scan
 import logging
 
 logger = logging.getLogger(__name__)
@@ -246,10 +245,12 @@ def store_qr_code(request):
         product.save()
         logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
 
-        if process_qr_scan(qr_scan):
-            return Response({"success": "QR Code data stored successfully"}, status=200)
-        else:
-            return Response({"error": "Failed to process QR Code data"}, status=500)
+        # Process QR scan (example logic)
+        logger.info(f"Processing QR scan: {qr_scan.data}")
+        qr_scan.processed = True
+        qr_scan.save()
+
+        return Response({"success": "QR Code data stored successfully"}, status=200)
 
     except Exception as e:
         logger.error(f"Error processing QR code data: {str(e)}")
