@@ -198,6 +198,8 @@ from .models import Category, Product
 
 logger = logging.getLogger(__name__)
 
+from django.db.models import F
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def store_qr_code(request):
@@ -242,19 +244,21 @@ def store_qr_code(request):
         category, _ = Category.objects.get_or_create(name=category_name)
         logger.info(f"Category: {category.name}")
 
-        # Fetch or create the product
-        product, created = Product.objects.get_or_create(
-            name=product_name,
-            category=category,
-            defaults={'available_quantity': 0}  # Ensure available_quantity is initialized
-        )
+        # 🔍 Fix: Use filter() instead of get() to handle multiple products
+        existing_products = Product.objects.filter(name=product_name, category=category)
 
-        logger.info(f"Product: {product.name}, Created: {created}")
-
-        # Update available quantity
-        product.available_quantity += quantity
-        product.save()
-        logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
+        if existing_products.exists():
+            product = existing_products.first()  # Pick the first one to update
+            product.available_quantity = F('available_quantity') + quantity
+            product.save()
+            logger.info(f"Updated product {product_name} with quantity {quantity}. New available quantity: {product.available_quantity}")
+        else:
+            product = Product.objects.create(
+                name=product_name,
+                category=category,
+                available_quantity=quantity
+            )
+            logger.info(f"Created new product {product_name} with quantity {quantity}.")
 
         return Response({"success": "QR Code data stored successfully"}, status=200)
 
