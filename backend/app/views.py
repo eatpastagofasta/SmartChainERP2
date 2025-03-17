@@ -196,7 +196,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import Category, Product
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(_name_)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
