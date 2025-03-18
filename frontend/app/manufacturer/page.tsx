@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
@@ -51,7 +51,7 @@ interface Notification {
 
 // Hardcoded data
 const testData: OverviewCard = {
-  totalSales: 0, // Initialize with 0
+  totalSales: 50000,
   numStores: 120,
   deliveryAgents: 45,
   pendingOrders: 230,
@@ -110,28 +110,11 @@ const notifications: Notification[] = [
 ];
 
 const Dashboard: React.FC = () => {
-  const [data, setData] = useState<OverviewCard>(testData);
+  const [data] = useState<OverviewCard>(testData);
   const [analytics] = useState<AnalyticsData>(analyticsData);
   const [reports] = useState<ReportData>(reportData);
   const [notif] = useState<Notification[]>(notifications);
   const [paymentData] = useState(payments); // Define paymentData state
-
-  useEffect(() => {
-    const fetchTotalSales = async () => {
-      try {
-        const response = await fetch("https://smartchainerp2.onrender.com/api/total-sales/");
-        const result = await response.json();
-        setData((prevData) => ({
-          ...prevData,
-          totalSales: result.totalSales,
-        }));
-      } catch (error) {
-        console.error("Error fetching total sales:", error);
-      }
-    };
-
-    fetchTotalSales();
-  }, []);
 
   return (
     <div className="flex  flex-col min-h-screen bg-neutral-950 text-white p-6">
