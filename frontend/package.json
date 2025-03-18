@@ -7,7 +7,7 @@
 
   "scripts": {
     "dev": "concurrently \"next dev\" \"wait-on http://localhost:3000 && electron .\"",
-    "build": "next build && next export",
+    "build": "next build",
     "start": "next start",
     "electron": "electron .",
     "electron-pack": "electron-builder",
