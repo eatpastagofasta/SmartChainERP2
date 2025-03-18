@@ -16,7 +16,7 @@ from .serializers import (
 )
 from .allocation import allocate_shipments
 from .permissions import IsAdminUser
-from django.db.models import F
+from django.db.models import F, Sum
 
 from django.shortcuts import redirect
 
@@ -265,3 +265,12 @@ def store_qr_code(request):
     except Exception as e:
         logger.error(f"Error processing QR code data: {str(e)}")
         return Response({"error": str(e)}, status=500)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_total_sales(request):
+    try:
+        total_sales = Order.objects.aggregate(total_sales=Sum('total_amount'))['total_sales']
+        return Response({'totalSales': total_sales}, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
