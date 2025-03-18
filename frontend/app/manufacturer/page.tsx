@@ -71,6 +71,13 @@ const reportData: ReportData = {
   customerSatisfaction: 92,
 };
 
+const payments = [
+  { id: "1", date: "2025-02-15", amount: 250, status: "success" as const, email: "customer1@example.com" },
+  { id: "2", date: "2025-02-14", amount: 150, status: "pending" as const, email: "customer2@example.com" },
+  { id: "3", date: "2025-02-13", amount: 300, status: "success" as const, email: "customer3@example.com" },
+  { id: "4", date: "2025-02-12", amount: 100, status: "failed" as const, email: "customer4@example.com" },
+];
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -107,6 +114,7 @@ const Dashboard: React.FC = () => {
   const [analytics] = useState<AnalyticsData>(analyticsData);
   const [reports] = useState<ReportData>(reportData);
   const [notif] = useState<Notification[]>(notifications);
+  const [paymentData] = useState(payments); // Define paymentData state
 
   return (
     <div className="flex  flex-col min-h-screen bg-neutral-950 text-white p-6">
@@ -232,7 +240,7 @@ const Dashboard: React.FC = () => {
                     Data
                   </h2>
                   
-                  <DataTable columns={columns} data={payments} />
+                  <DataTable columns={columns} data={paymentData} /> {/* Use paymentData state */}
                 </Card>
               </div>
             </div>
