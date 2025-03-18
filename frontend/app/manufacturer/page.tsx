@@ -22,7 +22,7 @@ import {
   TruckIcon,
 } from "lucide-react";
 
-// Interface for all the tabs
+//Interface for all the tabs
 interface OverviewCard {
   totalSales: number;
   numStores: number;
@@ -49,7 +49,8 @@ interface Notification {
   date: string;
 }
 
-// Hardcoded data
+//Hardcoded data
+
 const testData: OverviewCard = {
   totalSales: 50000,
   numStores: 120,
@@ -109,7 +110,7 @@ type Payment = {
   email: string;
 };
 
-const payments: Payment[] = [
+export const payments: Payment[] = [
   {
     id: "728ed52f",
     amount: 100,
@@ -143,11 +144,38 @@ const payments: Payment[] = [
   // ...
 ];
 
+// const API_URL = "";
+
 const Dashboard: React.FC = () => {
   const [data] = useState<OverviewCard>(testData);
   const [analytics] = useState<AnalyticsData>(analyticsData);
   const [reports] = useState<ReportData>(reportData);
   const [notif] = useState<Notification[]>(notifications);
+
+  //WAITING FOR BACKEND :)))
+
+  // const [data, setData] = useState<OverviewCard | null>(null);
+  // const [loading, setLoading] = useState<boolean>(true);
+  // const [error, setError] = useState<string | null>(null);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch(API_URL);
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch data");
+  //       }
+  //       const result: OverviewCard = await response.json();
+  //       setData(result);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
 
   return (
     <div className="flex  flex-col min-h-screen bg-neutral-950 text-white p-6">
@@ -246,7 +274,7 @@ const Dashboard: React.FC = () => {
                       config={chartConfig}
                       className="w-full h-full"
                     >
-                      <BarChart data={chartData}>
+                      <BarChart accessibilityLayer data={chartData}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                           dataKey="month"
@@ -272,7 +300,7 @@ const Dashboard: React.FC = () => {
                     <TableIcon className="w-5 h-5 text-blue-400 " /> Transaction
                     Data
                   </h2>
-                  
+
                   <DataTable columns={columns} data={payments} />
                 </Card>
               </div>
