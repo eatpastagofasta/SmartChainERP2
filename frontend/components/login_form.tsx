@@ -58,6 +58,8 @@ export function LoginForm({
         // Redirect based on the selected role
         if (role === "customer") {
           router.replace("/customerpage/dashboard");
+        } else if (role === "manufacturer") {
+          router.replace("/manufacturer/"); // Redirect to /manufacturer/
         } else {
           router.replace(`/${role}/dashboard`);
         }
