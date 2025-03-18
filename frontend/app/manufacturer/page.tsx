@@ -22,7 +22,7 @@ import {
   TruckIcon,
 } from "lucide-react";
 
-//Interface for all the tabs
+// Interface for all the tabs
 interface OverviewCard {
   totalSales: number;
   numStores: number;
@@ -49,8 +49,7 @@ interface Notification {
   date: string;
 }
 
-//Hardcoded data
-
+// Hardcoded data
 const testData: OverviewCard = {
   totalSales: 50000,
   numStores: 120,
@@ -71,6 +70,13 @@ const reportData: ReportData = {
   profit: 65000,
   customerSatisfaction: 92,
 };
+
+const payments = [
+  { id: "1", date: "2025-02-15", amount: 250, status: "success" as const, email: "customer1@example.com" },
+  { id: "2", date: "2025-02-14", amount: 150, status: "pending" as const, email: "customer2@example.com" },
+  { id: "3", date: "2025-02-13", amount: 300, status: "success" as const, email: "customer3@example.com" },
+  { id: "4", date: "2025-02-12", amount: 100, status: "failed" as const, email: "customer4@example.com" },
+];
 
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
@@ -103,79 +109,12 @@ const notifications: Notification[] = [
   { id: 4, message: "New customer feedback received", date: "2025-02-13" },
 ];
 
-type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-};
-
-export const payments: Payment[] = [
-  {
-    id: "728ed52f",
-    amount: 100,
-    status: "pending",
-    email: "m@example.com",
-  },
-  {
-    id: "489e1d42",
-    amount: 125,
-    status: "processing",
-    email: "example@gmail.com",
-  },
-  {
-    id: "489e1d4552",
-    amount: 125,
-    status: "success",
-    email: "example@gmail.com",
-  },
-  {
-    id: "489e1d432",
-    amount: 125,
-    status: "failed",
-    email: "example@gmail.com",
-  },
-  {
-    id: "489e1d422",
-    amount: 125,
-    status: "failed",
-    email: "example@gmail.com",
-  },
-  // ...
-];
-
-// const API_URL = "";
-
 const Dashboard: React.FC = () => {
   const [data] = useState<OverviewCard>(testData);
   const [analytics] = useState<AnalyticsData>(analyticsData);
   const [reports] = useState<ReportData>(reportData);
   const [notif] = useState<Notification[]>(notifications);
-
-  //WAITING FOR BACKEND :)))
-
-  // const [data, setData] = useState<OverviewCard | null>(null);
-  // const [loading, setLoading] = useState<boolean>(true);
-  // const [error, setError] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await fetch(API_URL);
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch data");
-  //       }
-  //       const result: OverviewCard = await response.json();
-  //       setData(result);
-  //     } catch (err) {
-  //       setError((err as Error).message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
+  const [paymentData] = useState(payments); // Define paymentData state
 
   return (
     <div className="flex  flex-col min-h-screen bg-neutral-950 text-white p-6">
@@ -274,7 +213,7 @@ const Dashboard: React.FC = () => {
                       config={chartConfig}
                       className="w-full h-full"
                     >
-                      <BarChart accessibilityLayer data={chartData}>
+                      <BarChart data={chartData}>
                         <CartesianGrid vertical={false} />
                         <XAxis
                           dataKey="month"
@@ -300,8 +239,8 @@ const Dashboard: React.FC = () => {
                     <TableIcon className="w-5 h-5 text-blue-400 " /> Transaction
                     Data
                   </h2>
-
-                  <DataTable columns={columns} data={payments} />
+                  
+                  <DataTable columns={columns} data={paymentData} /> {/* Use paymentData state */}
                 </Card>
               </div>
             </div>
