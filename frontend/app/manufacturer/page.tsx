@@ -71,13 +71,6 @@ const reportData: ReportData = {
   customerSatisfaction: 92,
 };
 
-const payments = [
-  { id: "1", date: "2025-02-15", amount: 250, status: "success" as const, email: "customer1@example.com" },
-  { id: "2", date: "2025-02-14", amount: 150, status: "pending" as const, email: "customer2@example.com" },
-  { id: "3", date: "2025-02-13", amount: 300, status: "success" as const, email: "customer3@example.com" },
-  { id: "4", date: "2025-02-12", amount: 100, status: "failed" as const, email: "customer4@example.com" },
-];
-
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -109,12 +102,52 @@ const notifications: Notification[] = [
   { id: 4, message: "New customer feedback received", date: "2025-02-13" },
 ];
 
+type Payment = {
+  id: string;
+  amount: number;
+  status: "pending" | "processing" | "success" | "failed";
+  email: string;
+};
+
+const payments: Payment[] = [
+  {
+    id: "728ed52f",
+    amount: 100,
+    status: "pending",
+    email: "m@example.com",
+  },
+  {
+    id: "489e1d42",
+    amount: 125,
+    status: "processing",
+    email: "example@gmail.com",
+  },
+  {
+    id: "489e1d4552",
+    amount: 125,
+    status: "success",
+    email: "example@gmail.com",
+  },
+  {
+    id: "489e1d432",
+    amount: 125,
+    status: "failed",
+    email: "example@gmail.com",
+  },
+  {
+    id: "489e1d422",
+    amount: 125,
+    status: "failed",
+    email: "example@gmail.com",
+  },
+  // ...
+];
+
 const Dashboard: React.FC = () => {
   const [data] = useState<OverviewCard>(testData);
   const [analytics] = useState<AnalyticsData>(analyticsData);
   const [reports] = useState<ReportData>(reportData);
   const [notif] = useState<Notification[]>(notifications);
-  const [paymentData] = useState(payments); // Define paymentData state
 
   return (
     <div className="flex  flex-col min-h-screen bg-neutral-950 text-white p-6">
@@ -240,7 +273,7 @@ const Dashboard: React.FC = () => {
                     Data
                   </h2>
                   
-                  <DataTable columns={columns} data={paymentData} /> {/* Use paymentData state */}
+                  <DataTable columns={columns} data={payments} />
                 </Card>
               </div>
             </div>
